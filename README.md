@@ -71,7 +71,8 @@ src/
 │  ├─ AboutView.vue
 │  └─ HomeView.vue
 ├─ App.vue
-└─ main.js
+├─ main.js
+└─ style.css
 ```
 
 ## Funcionalidades principales
