@@ -147,14 +147,21 @@ function emitDelete() {
   padding: 1rem;
   border-radius: 14px;
   border: 2px solid transparent;
-  background: white;
+  background: var(--surface-color);
+  color: var(--text-color);
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
 }
 
 .card__header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 1rem;
+}
+
+.card__header > div:first-child {
+  flex: 1;
+  min-width: 0;
 }
 
 .card__body {
@@ -170,7 +177,7 @@ function emitDelete() {
 .category {
   font-size: 0.875rem;
   font-weight: 700;
-  color: #475569;
+  color: var(--text-soft);
   text-transform: uppercase;
 }
 
@@ -187,12 +194,21 @@ function emitDelete() {
 }
 
 .favorite-btn {
-  background: #fef3c7;
+  flex-shrink: 0;
+  min-width: 92px;
+  display: grid;
+  place-items: center;
+  gap: 0.25rem;
+  text-align: center;
+  background: var(--surface-soft);
+  color: var(--text-color);
+  white-space: normal;
+  word-break: break-word;
 }
 
 .reserve-btn {
-  background: #2563eb;
-  color: white;
+  background: var(--button-bg);
+  color: var(--button-text);
 }
 
 .release-btn {
@@ -207,7 +223,8 @@ function emitDelete() {
 
 .reserve-btn:disabled,
 .release-btn:disabled {
-  background: #94a3b8;
+  background: var(--border-color);
+  color: var(--text-soft);
   cursor: not-allowed;
 }
 
@@ -216,12 +233,12 @@ function emitDelete() {
   height: 12px;
   overflow: hidden;
   border-radius: 999px;
-  background: #e2e8f0;
+  background: var(--surface-soft);
 }
 
 .progress__fill {
   height: 100%;
-  background: #2563eb;
+  background: var(--button-bg);
   transition: width 0.3s ease;
 }
 
@@ -235,8 +252,6 @@ function emitDelete() {
 
 .sold-out {
   border-color: #ef4444;
-  background: #fef2f2;
-  opacity: 0.95;
 }
 
 .sold-out .status-text {

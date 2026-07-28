@@ -47,10 +47,11 @@
         class="tabs-themed"
         :events="filteredAndSortedEvents"
         :accent-color="accentColor"
-        @reserve="handleReserve"
-        @release="handleRelease"
-        @toggle-favorite="handleToggleFavorite"
+        @reserve="reserveEvent"
+        @release="releaseEvent"
+        @toggle-favorite="toggleFavorite"
         @delete-event="handleDeleteEvent"
+        @create-event="createEvent"
       />
     </template>
   </section>
@@ -58,15 +59,25 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { initialEvents } from '../data/events'
 import SearchBar from '../components/SearchBar.vue'
 import SessionTimer from '../components/SessionTimer.vue'
 import LoadingState from '../components/LoadingState.vue'
 import EmptyState from '../components/EmptyState.vue'
 import NotificationToast from '../components/NotificationToast.vue'
 import TabsSection from '../components/TabsSection.vue'
+import { useEvents } from '../composables/useEvents'
 
-const events = ref([])
+const {
+  events,
+  notification,
+  totalReservedSeats,
+  reserveEvent,
+  releaseEvent,
+  toggleFavorite,
+  deleteEvent,
+  createEvent
+} = useEvents()
+
 const isLoading = ref(true)
 
 const searchTerm = ref('')
@@ -77,16 +88,8 @@ const accentColor = ref('#2563eb')
 
 const showTimer = ref(true)
 
-const notification = ref({
-  message: '',
-  type: 'info'
-})
-
-let notificationTimeoutId = null
-
 onMounted(() => {
   setTimeout(() => {
-    events.value = initialEvents
     isLoading.value = false
   }, 1000)
 })
@@ -114,11 +117,9 @@ const filteredAndSortedEvents = computed(() => {
     case 'price-asc':
       sorted.sort((a, b) => a.precio - b.precio)
       break
-
     case 'price-desc':
       sorted.sort((a, b) => b.precio - a.precio)
       break
-
     case 'availability-asc':
       sorted.sort(
         (a, b) =>
@@ -126,7 +127,6 @@ const filteredAndSortedEvents = computed(() => {
           (b.cuposTotales - b.cuposReservados)
       )
       break
-
     case 'availability-desc':
       sorted.sort(
         (a, b) =>
@@ -134,82 +134,12 @@ const filteredAndSortedEvents = computed(() => {
           (a.cuposTotales - a.cuposReservados)
       )
       break
-
     default:
       break
   }
 
   return sorted
 })
-
-const totalReservedSeats = computed(() =>
-  events.value.reduce((acc, event) => acc + event.cuposReservados, 0)
-)
-
-function showNotification(message, type = 'info') {
-  notification.value = { message, type }
-
-  if (notificationTimeoutId) {
-    clearTimeout(notificationTimeoutId)
-  }
-
-  notificationTimeoutId = setTimeout(() => {
-    notification.value = { message: '', type: 'info' }
-  }, 2500)
-}
-
-function handleReserve(eventId) {
-  let updated = false
-
-  events.value = events.value.map((event) => {
-    if (event.id !== eventId) return event
-    if (event.cuposReservados >= event.cuposTotales) return event
-
-    updated = true
-
-    return {
-      ...event,
-      cuposReservados: event.cuposReservados + 1
-    }
-  })
-
-  if (updated) {
-    showNotification('Cupo reservado correctamente.', 'success')
-  }
-}
-
-function handleRelease(eventId) {
-  let updated = false
-
-  events.value = events.value.map((event) => {
-    if (event.id !== eventId) return event
-    if (event.cuposReservados <= 0) return event
-
-    updated = true
-
-    return {
-      ...event,
-      cuposReservados: event.cuposReservados - 1
-    }
-  })
-
-  if (updated) {
-    showNotification('Se liberó un cupo.', 'warning')
-  }
-}
-
-function handleToggleFavorite(eventId) {
-  events.value = events.value.map((event) => {
-    if (event.id !== eventId) return event
-
-    return {
-      ...event,
-      favorito: !event.favorito
-    }
-  })
-
-  showNotification('Favorito actualizado.', 'info')
-}
 
 function handleDeleteEvent(eventId) {
   const eventToDelete = events.value.find((event) => event.id === eventId)
@@ -222,8 +152,7 @@ function handleDeleteEvent(eventId) {
 
   if (!confirmed) return
 
-  events.value = events.value.filter((event) => event.id !== eventId)
-  showNotification('El evento fue cancelado.', 'error')
+  deleteEvent(eventId)
 }
 
 function clearAllFilters() {

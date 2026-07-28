@@ -1,3 +1,31 @@
+:root {
+  --bg-color: #f1f5f9;
+  --surface-color: #ffffff;
+  --surface-soft: #e2e8f0;
+  --text-color: #0f172a;
+  --text-soft: #475569;
+  --border-color: #cbd5e1;
+  --header-bg: #ffffff;
+  --button-bg: #2563eb;
+  --button-text: #ffffff;
+  --danger-color: #dc2626;
+  --success-color: #22c55e;
+  --warning-color: #f59e0b;
+  --teal-action: #0f766e;
+}
+
+[data-theme='dark'] {
+  --bg-color: #0f172a;
+  --surface-color: #1e293b;
+  --surface-soft: #334155;
+  --text-color: #f8fafc;
+  --text-soft: #cbd5e1;
+  --border-color: #475569;
+  --header-bg: #1e293b;
+  --button-bg: #f59e0b;
+  --button-text: #0f172a;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -5,12 +33,15 @@
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 

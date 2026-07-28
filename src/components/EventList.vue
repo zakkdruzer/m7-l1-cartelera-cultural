@@ -1,15 +1,17 @@
 <template>
   <section class="event-list">
-    <EventCard
-      v-for="event in events"
-      :key="event.id"
-      :event="event"
-      currency-code="CLP"
-      @reserve="$emit('reserve', $event)"
-      @release="$emit('release', $event)"
-      @toggle-favorite="$emit('toggle-favorite', $event)"
-      @delete-event="$emit('delete-event', $event)"
-    />
+    <template v-for="event in events" :key="event.id">
+      <slot name="item" :event="event">
+        <EventCard
+          :event="event"
+          currency-code="CLP"
+          @reserve="$emit('reserve', $event)"
+          @release="$emit('release', $event)"
+          @toggle-favorite="$emit('toggle-favorite', $event)"
+          @delete-event="$emit('delete-event', $event)"
+        />
+      </slot>
+    </template>
   </section>
 </template>
 

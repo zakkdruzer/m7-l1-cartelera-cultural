@@ -33,6 +33,7 @@
         @release="$emit('release', $event)"
         @toggle-favorite="$emit('toggle-favorite', $event)"
         @delete-event="$emit('delete-event', $event)"
+        @create-event="$emit('create-event', $event)"
       />
     </KeepAlive>
   </section>
@@ -43,6 +44,7 @@ import { computed, ref } from 'vue'
 import TabCartelera from './tabs/TabCartelera.vue'
 import TabResumenMes from './tabs/TabResumenMes.vue'
 import TabNotasEquipo from './tabs/TabNotasEquipo.vue'
+import TabCrearEvento from './tabs/TabCrearEvento.vue'
 
 defineProps({
   events: {
@@ -59,7 +61,8 @@ defineEmits([
   'reserve',
   'release',
   'toggle-favorite',
-  'delete-event'
+  'delete-event',
+  'create-event'
 ])
 
 const tabs = [
@@ -77,6 +80,11 @@ const tabs = [
     key: 'notas',
     label: 'Notas del equipo',
     component: TabNotasEquipo
+  },
+  {
+    key: 'crear',
+    label: 'Crear evento',
+    component: TabCrearEvento
   }
 ]
 
