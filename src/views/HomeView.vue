@@ -1,5 +1,10 @@
 <template>
   <section class="home">
+    <NotificationToast
+      :message="notification.message"
+      :type="notification.type"
+    />
+
     <div class="top-panel">
       <div class="summary">
         <h2>Eventos disponibles</h2>
@@ -16,21 +21,30 @@
 
     <SessionTimer v-if="showTimer" />
 
-    <SearchBar v-model="searchTerm" />
+    <SearchBar
+      :search-term="searchTerm"
+      :selected-category="selectedCategory"
+      :only-available="onlyAvailable"
+      @update:searchTerm="searchTerm = $event"
+      @update:selectedCategory="selectedCategory = $event"
+      @update:onlyAvailable="onlyAvailable = $event"
+    />
 
     <LoadingState v-if="isLoading" />
 
     <template v-else>
       <EmptyState
         v-if="filteredEvents.length === 0"
-        @clear="clearSearch"
+        @clear="clearAllFilters"
       />
 
       <EventList
         v-else
         :events="filteredEvents"
         @reserve="handleReserve"
+        @release="handleRelease"
         @toggle-favorite="handleToggleFavorite"
+        @delete-event="handleDeleteEvent"
       />
     </template>
   </section>
@@ -44,13 +58,22 @@ import SearchBar from '../components/SearchBar.vue'
 import SessionTimer from '../components/SessionTimer.vue'
 import LoadingState from '../components/LoadingState.vue'
 import EmptyState from '../components/EmptyState.vue'
+import NotificationToast from '../components/NotificationToast.vue'
 
 const events = ref([])
 const isLoading = ref(true)
 const searchTerm = ref('')
+const selectedCategory = ref('')
+const onlyAvailable = ref(false)
 const showTimer = ref(true)
 
-// Simula una carga asíncrona parecida a una petición al servidor.
+const notification = ref({
+  message: '',
+  type: 'info'
+})
+
+let notificationTimeoutId = null
+
 onMounted(() => {
   setTimeout(() => {
     events.value = initialEvents
@@ -58,34 +81,78 @@ onMounted(() => {
   }, 1000)
 })
 
-// Valor derivado: nunca destruye el arreglo original.
 const filteredEvents = computed(() => {
   const query = searchTerm.value.trim().toLowerCase()
 
-  if (!query) return events.value
+  return events.value.filter((event) => {
+    const matchesTitle = event.titulo.toLowerCase().includes(query)
 
-  return events.value.filter((event) =>
-    event.titulo.toLowerCase().includes(query)
-  )
+    const matchesCategory = selectedCategory.value
+      ? event.categoria === selectedCategory.value
+      : true
+
+    const matchesAvailability = onlyAvailable.value
+      ? event.cuposReservados < event.cuposTotales
+      : true
+
+    return matchesTitle && matchesCategory && matchesAvailability
+  })
 })
 
-// Total visible en el componente raíz, tal como pide la actividad.
 const totalReservedSeats = computed(() =>
   events.value.reduce((acc, event) => acc + event.cuposReservados, 0)
 )
 
-// El hijo no modifica datos directamente, solo emite el id.
+function showNotification(message, type = 'info') {
+  notification.value = { message, type }
+
+  if (notificationTimeoutId) {
+    clearTimeout(notificationTimeoutId)
+  }
+
+  notificationTimeoutId = setTimeout(() => {
+    notification.value = { message: '', type: 'info' }
+  }, 2500)
+}
+
 function handleReserve(eventId) {
+  let updated = false
+
   events.value = events.value.map((event) => {
     if (event.id !== eventId) return event
-
     if (event.cuposReservados >= event.cuposTotales) return event
+
+    updated = true
 
     return {
       ...event,
       cuposReservados: event.cuposReservados + 1
     }
   })
+
+  if (updated) {
+    showNotification('Cupo reservado correctamente.', 'success')
+  }
+}
+
+function handleRelease(eventId) {
+  let updated = false
+
+  events.value = events.value.map((event) => {
+    if (event.id !== eventId) return event
+    if (event.cuposReservados <= 0) return event
+
+    updated = true
+
+    return {
+      ...event,
+      cuposReservados: event.cuposReservados - 1
+    }
+  })
+
+  if (updated) {
+    showNotification('Se liberó un cupo.', 'warning')
+  }
 }
 
 function handleToggleFavorite(eventId) {
@@ -97,10 +164,29 @@ function handleToggleFavorite(eventId) {
       favorito: !event.favorito
     }
   })
+
+  showNotification('Favorito actualizado.', 'info')
 }
 
-function clearSearch() {
+function handleDeleteEvent(eventId) {
+  const eventToDelete = events.value.find((event) => event.id === eventId)
+
+  if (!eventToDelete) return
+
+  const confirmed = window.confirm(
+    `¿Seguro que quieres cancelar "${eventToDelete.titulo}"?`
+  )
+
+  if (!confirmed) return
+
+  events.value = events.value.filter((event) => event.id !== eventId)
+  showNotification('El evento fue cancelado.', 'error')
+}
+
+function clearAllFilters() {
   searchTerm.value = ''
+  selectedCategory.value = ''
+  onlyAvailable.value = false
 }
 </script>
 

@@ -6,7 +6,9 @@
       :event="event"
       currency-code="CLP"
       @reserve="$emit('reserve', $event)"
+      @release="$emit('release', $event)"
       @toggle-favorite="$emit('toggle-favorite', $event)"
+      @delete-event="$emit('delete-event', $event)"
     />
   </section>
 </template>
@@ -21,7 +23,12 @@ defineProps({
   }
 })
 
-defineEmits(['reserve', 'toggle-favorite'])
+defineEmits([
+  'reserve',
+  'release',
+  'toggle-favorite',
+  'delete-event'
+])
 </script>
 
 <style scoped>

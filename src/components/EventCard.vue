@@ -34,14 +34,33 @@
       <div class="progress__fill" :style="{ width: `${occupancyPercentage}%` }"></div>
     </div>
 
-    <button
-      class="reserve-btn"
-      type="button"
-      :disabled="isSoldOut"
-      @click="emitReserve"
-    >
-      {{ isSoldOut ? 'Agotado' : 'Reservar cupo' }}
-    </button>
+    <div class="card__actions">
+      <button
+        class="reserve-btn"
+        type="button"
+        :disabled="isSoldOut"
+        @click="emitReserve"
+      >
+        {{ isSoldOut ? 'Agotado' : 'Reservar cupo' }}
+      </button>
+
+      <button
+        class="release-btn"
+        type="button"
+        :disabled="event.cuposReservados === 0"
+        @click="emitRelease"
+      >
+        Liberar cupo
+      </button>
+
+      <button
+        class="delete-btn"
+        type="button"
+        @click="emitDelete"
+      >
+        Cancelar evento
+      </button>
+    </div>
   </article>
 </template>
 
@@ -51,7 +70,10 @@ import { computed } from 'vue'
 const props = defineProps({
   event: {
     type: Object,
-    required: true
+    required: true,
+    validator(value) {
+      return ['Taller', 'Concierto', 'Teatro', 'Exposición'].includes(value.categoria)
+    }
   },
   currencyCode: {
     type: String,
@@ -59,9 +81,13 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['reserve', 'toggle-favorite'])
+const emit = defineEmits([
+  'reserve',
+  'release',
+  'toggle-favorite',
+  'delete-event'
+])
 
-// Valor derivado: no se guarda porque se calcula desde los datos base.
 const availableSeats = computed(() => {
   return props.event.cuposTotales - props.event.cuposReservados
 })
@@ -72,7 +98,9 @@ const occupancyPercentage = computed(() => {
   )
 })
 
-const isSoldOut = computed(() => availableSeats.value <= 0)
+const isSoldOut = computed(() => {
+  return availableSeats.value <= 0
+})
 
 const formattedPrice = computed(() => {
   if (props.event.precio === 0) return 'Gratis'
@@ -83,7 +111,6 @@ const formattedPrice = computed(() => {
   }).format(props.event.precio)
 })
 
-// La lógica de clases queda en script para no ensuciar el template.
 const statusClass = computed(() => {
   if (occupancyPercentage.value === 100) return 'sold-out'
   if (occupancyPercentage.value >= 50) return 'almost-full'
@@ -100,8 +127,16 @@ function emitReserve() {
   emit('reserve', props.event.id)
 }
 
+function emitRelease() {
+  emit('release', props.event.id)
+}
+
 function emitToggleFavorite() {
   emit('toggle-favorite', props.event.id)
+}
+
+function emitDelete() {
+  emit('delete-event', props.event.id)
 }
 </script>
 
@@ -127,6 +162,11 @@ function emitToggleFavorite() {
   gap: 0.4rem;
 }
 
+.card__actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .category {
   font-size: 0.875rem;
   font-weight: 700;
@@ -135,7 +175,9 @@ function emitToggleFavorite() {
 }
 
 .favorite-btn,
-.reserve-btn {
+.reserve-btn,
+.release-btn,
+.delete-btn {
   min-width: 44px;
   min-height: 44px;
   border: none;
@@ -153,7 +195,18 @@ function emitToggleFavorite() {
   color: white;
 }
 
-.reserve-btn:disabled {
+.release-btn {
+  background: #0f766e;
+  color: white;
+}
+
+.delete-btn {
+  background: #dc2626;
+  color: white;
+}
+
+.reserve-btn:disabled,
+.release-btn:disabled {
   background: #94a3b8;
   cursor: not-allowed;
 }
