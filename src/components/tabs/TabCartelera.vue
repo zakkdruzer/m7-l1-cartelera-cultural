@@ -15,18 +15,15 @@
       @delete-event="$emit('delete-event', $event)"
     >
       <template #item="{ event }">
-        <div class="event-wrapper">
-          <span v-if="event.favorito" class="badge">Destacado</span>
-
-          <EventCard
-            :event="event"
-            currency-code="CLP"
-            @reserve="$emit('reserve', $event)"
-            @release="$emit('release', $event)"
-            @toggle-favorite="$emit('toggle-favorite', $event)"
-            @delete-event="$emit('delete-event', $event)"
-          />
-        </div>
+        <EventCard
+          :event="event"
+          :show-highlight="event.favorito"
+          currency-code="CLP"
+          @reserve="$emit('reserve', $event)"
+          @release="$emit('release', $event)"
+          @toggle-favorite="$emit('toggle-favorite', $event)"
+          @delete-event="$emit('delete-event', $event)"
+        />
       </template>
     </EventList>
   </BasePanel>
@@ -51,22 +48,3 @@ defineEmits([
   'delete-event'
 ])
 </script>
-
-<style scoped>
-.event-wrapper {
-  position: relative;
-}
-
-.badge {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  z-index: 2;
-  padding: 0.35rem 0.6rem;
-  border-radius: 999px;
-  background: #f59e0b;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-</style>

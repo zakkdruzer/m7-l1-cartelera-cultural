@@ -28,7 +28,8 @@ onUnmounted(() => {
 .timer-box {
   padding: 1rem;
   border-radius: 12px;
-  background: #ecfeff;
-  border: 1px solid #a5f3fc;
+  background: var(--surface-soft);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
 }
 </style>

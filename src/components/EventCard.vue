@@ -1,5 +1,7 @@
 <template>
   <article class="card" :class="statusClass">
+    <span v-if="showHighlight" class="highlight-badge">Destacado</span>
+
     <div class="card__header">
       <div>
         <p class="category">{{ event.categoria }}</p>
@@ -78,6 +80,10 @@ const props = defineProps({
   currencyCode: {
     type: String,
     default: 'CLP'
+  },
+  showHighlight: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -143,13 +149,27 @@ function emitDelete() {
 <style scoped>
 .card {
   display: grid;
-  gap: 1rem;
+  gap: 0.85rem;
   padding: 1rem;
   border-radius: 14px;
   border: 2px solid transparent;
   background: var(--surface-color);
   color: var(--text-color);
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+}
+
+.highlight-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-bottom: -0.15rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .card__header {
