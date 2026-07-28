@@ -1,18 +1,30 @@
 # Cartelera Cultural
 
-Aplicación desarrollada con Vue 3, Vite y Vue Router para gestionar una cartelera de eventos culturales. Permite visualizar eventos, reservar cupos, marcar favoritos, buscar por título y manejar estados de carga y ciclo de vida de componentes.
+Aplicación desarrollada con Vue 3, Vite y Vue Router para gestionar una cartelera de eventos culturales. Permite visualizar eventos, reservar y liberar cupos, marcar favoritos, filtrar y ordenar resultados, crear nuevos eventos desde la interfaz y trabajar con persistencia de datos, componentes dinámicos, slots y modo oscuro.
 
 ## Características
 
-- Visualización de eventos culturales en tarjetas.
-- Reserva de cupos por evento.
+- Visualización de eventos culturales en tarjetas reutilizables.
+- Reserva y liberación de cupos por evento.
 - Marcado y desmarcado de favoritos.
+- Cancelación de eventos con confirmación previa.
 - Cálculo de cupos disponibles y porcentaje de ocupación.
 - Barra de progreso por evento.
 - Carga asíncrona simulada.
 - Contador de sesión con limpieza de intervalo al desmontar el componente.
 - Buscador por título en tiempo real.
+- Filtro por categoría.
+- Filtro de solo eventos disponibles.
+- Ordenamiento por precio y disponibilidad.
+- Notificaciones temporales para acciones del usuario.
 - Estado vacío con opción para limpiar búsqueda.
+- Navegación por pestañas con componentes dinámicos.
+- Conservación del estado entre pestañas.
+- Formulario para crear eventos con validación por campo.
+- Persistencia de reservas, favoritos y eventos creados.
+- Contenido inyectado mediante slots para personalizar el renderizado de la lista.
+- Lógica de negocio extraída a composables reutilizables.
+- Modo oscuro con conmutador y preferencia del sistema.
 - Navegación con Vue Router.
 - Preparado para desplegar en GitHub Pages con hash routing.
 
@@ -23,6 +35,7 @@ Aplicación desarrollada con Vue 3, Vite y Vue Router para gestionar una cartele
 - Vue Router
 - JavaScript
 - CSS
+- localStorage
 
 ## Instalación
 
@@ -56,13 +69,25 @@ npm run preview
 src/
 ├─ assets/
 ├─ components/
+│  ├─ tabs/
+│  │  ├─ TabCartelera.vue
+│  │  ├─ TabCrearEvento.vue
+│  │  ├─ TabNotasEquipo.vue
+│  │  └─ TabResumenMes.vue
 │  ├─ AppHeader.vue
+│  ├─ BasePanel.vue
 │  ├─ EmptyState.vue
 │  ├─ EventCard.vue
+│  ├─ EventForm.vue
 │  ├─ EventList.vue
 │  ├─ LoadingState.vue
+│  ├─ NotificationToast.vue
 │  ├─ SearchBar.vue
-│  └─ SessionTimer.vue
+│  ├─ SessionTimer.vue
+│  └─ TabsSection.vue
+├─ composables/
+│  ├─ useEvents.js
+│  └─ useTheme.js
 ├─ data/
 │  └─ events.js
 ├─ router/
@@ -88,24 +113,59 @@ Cada evento se representa mediante una tarjeta reutilizable con su información 
 - Porcentaje de ocupación
 - Estado visual según disponibilidad
 
-### Reserva de cupos
+Además, los eventos pueden reservarse, liberar cupos, marcarse como favoritos o eliminarse desde la interfaz.
 
-Cada tarjeta permite reservar un cupo, siempre que el evento no esté agotado.  
-Cuando un evento llega a su capacidad máxima, el botón de reserva se deshabilita automáticamente.
+### Filtros y ordenamiento
 
-### Favoritos
+La aplicación permite:
 
-Los eventos pueden marcarse como favoritos para destacarlos visualmente dentro de la interfaz.
+- Buscar eventos por título.
+- Filtrar por categoría.
+- Mostrar solo eventos disponibles.
+- Ordenar por precio.
+- Ordenar por disponibilidad.
 
-### Búsqueda en tiempo real
+Todos estos criterios se combinan sin modificar el arreglo original de eventos.
 
-Existe un buscador por título que filtra la cartelera mientras el usuario escribe.  
-Si no hay coincidencias, se muestra un estado vacío con una acción para limpiar la búsqueda.
+### Estados derivados
 
-### Ciclo de vida
+La aplicación calcula dinámicamente:
+
+- Cupos disponibles.
+- Porcentaje de ocupación.
+- Total de cupos reservados.
+- Lista filtrada y ordenada.
+
+Esto evita duplicar estado y mantiene la información consistente en toda la interfaz.
+
+### Ciclo de vida y experiencia de usuario
 
 La aplicación simula carga asíncrona de datos al iniciar.  
-Además, incluye un contador de sesión que se actualiza cada segundo y se limpia correctamente al desmontar el componente para evitar fugas de memoria.
+También incluye un contador de sesión que se actualiza cada segundo y se limpia correctamente al desmontar el componente para evitar fugas de memoria.
+
+Además, cada acción importante muestra una notificación temporal y, cuando una búsqueda no arroja resultados, se presenta un estado vacío con una acción para limpiar filtros.
+
+### Componentes dinámicos y composición
+
+La interfaz incorpora pestañas dinámicas para navegar entre distintas secciones sin usar el router interno para ese flujo.  
+Las pestañas conservan su estado al cambiar de una a otra, incluyendo notas del equipo y el formulario de creación.
+
+También se utiliza un componente contenedor reutilizable y un sistema de slots que permite personalizar desde el padre cómo se renderiza cada elemento de la lista.
+
+### Persistencia y tema
+
+Las reservas, favoritos y eventos creados se guardan en el navegador, por lo que se mantienen incluso después de refrescar la página.
+
+La aplicación también incluye modo oscuro con un botón de conmutación manual y detección de la preferencia del sistema operativo.
+
+## Arquitectura
+
+La lógica principal de gestión de eventos fue extraída a un composable para mantener los componentes visuales más limpios y reutilizables.
+
+### Composables utilizados
+
+- `useEvents.js`: administra eventos, reservas, favoritos, notificaciones, persistencia y creación de nuevos eventos.
+- `useTheme.js`: controla el tema activo, el cambio entre modo claro y oscuro y la persistencia de la preferencia visual.
 
 ## Router
 
@@ -190,6 +250,6 @@ En la configuración del repositorio:
 - Seleccionar la rama **gh-pages**
 - Seleccionar la carpeta **/**
 
-## Puedes ver el resultado en:
+## Puedes ver el resultado en
 
 https://zakkdruzer.github.io/m7-l1-cartelera-cultural
